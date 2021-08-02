@@ -1,0 +1,312 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Face Recognition using face_recognition.ipynb",
+      "provenance": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "accelerator": "GPU"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/abdellah-0830/free-learner/blob/master/test4\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "PBHbsVEvij0u",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "87bd5bee-3562-483b-8266-fac2225ac933"
+      },
+      "source": [
+        "!pip install face_recognition"
+      ],
+      "execution_count": 56,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Requirement already satisfied: face_recognition in /usr/local/lib/python3.7/dist-packages (1.3.0)\n",
+            "Requirement already satisfied: face-recognition-models>=0.3.0 in /usr/local/lib/python3.7/dist-packages (from face_recognition) (0.3.0)\n",
+            "Requirement already satisfied: Pillow in /usr/local/lib/python3.7/dist-packages (from face_recognition) (7.1.2)\n",
+            "Requirement already satisfied: Click>=6.0 in /usr/local/lib/python3.7/dist-packages (from face_recognition) (7.1.2)\n",
+            "Requirement already satisfied: dlib>=19.7 in /usr/local/lib/python3.7/dist-packages (from face_recognition) (19.18.0)\n",
+            "Requirement already satisfied: numpy in /usr/local/lib/python3.7/dist-packages (from face_recognition) (1.19.5)\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "9U-E2RrDlz-1",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "49061272-734a-4096-f7dd-51049143bcc1"
+      },
+      "source": [
+        "!mkdir known\n",
+        "!wget https://www.biography.com/.image/t_share/MTY2MzU3Nzk2OTM2MjMwNTkx/elon_musk_royal_society.jpg -O known/elon.jpg\n",
+        "!wget https://pbs.twimg.com/profile_images/988775660163252226/XpgonN0X_400x400.jpg -O known/bill.jpg\n",
+        "!wget https://www.biography.com/.image/t_share/MTE4MDAzNDEwNzg5ODI4MTEw/barack-obama-12782369-1-402.jpg -O known/obama.jpg"
+      ],
+      "execution_count": 57,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "mkdir: cannot create directory ‘known’: File exists\n",
+            "--2021-08-02 00:41:46--  https://www.biography.com/.image/t_share/MTY2MzU3Nzk2OTM2MjMwNTkx/elon_musk_royal_society.jpg\n",
+            "Resolving www.biography.com (www.biography.com)... 151.101.130.98, 151.101.66.98, 151.101.194.98, ...\n",
+            "Connecting to www.biography.com (www.biography.com)|151.101.130.98|:443... connected.\n",
+            "HTTP request sent, awaiting response... 200 OK\n",
+            "Length: 151791 (148K) [image/jpeg]\n",
+            "Saving to: ‘known/elon.jpg’\n",
+            "\n",
+            "known/elon.jpg      100%[===================>] 148.23K  --.-KB/s    in 0.02s   \n",
+            "\n",
+            "2021-08-02 00:41:46 (8.39 MB/s) - ‘known/elon.jpg’ saved [151791/151791]\n",
+            "\n",
+            "--2021-08-02 00:41:46--  https://pbs.twimg.com/profile_images/988775660163252226/XpgonN0X_400x400.jpg\n",
+            "Resolving pbs.twimg.com (pbs.twimg.com)... 72.21.91.70\n",
+            "Connecting to pbs.twimg.com (pbs.twimg.com)|72.21.91.70|:443... connected.\n",
+            "HTTP request sent, awaiting response... 404 Not Found\n",
+            "2021-08-02 00:41:47 ERROR 404: Not Found.\n",
+            "\n",
+            "--2021-08-02 00:41:47--  https://www.biography.com/.image/t_share/MTE4MDAzNDEwNzg5ODI4MTEw/barack-obama-12782369-1-402.jpg\n",
+            "Resolving www.biography.com (www.biography.com)... 151.101.130.98, 151.101.66.98, 151.101.194.98, ...\n",
+            "Connecting to www.biography.com (www.biography.com)|151.101.130.98|:443... connected.\n",
+            "HTTP request sent, awaiting response... 200 OK\n",
+            "Length: 194499 (190K) [image/jpeg]\n",
+            "Saving to: ‘known/obama.jpg’\n",
+            "\n",
+            "known/obama.jpg     100%[===================>] 189.94K  --.-KB/s    in 0.01s   \n",
+            "\n",
+            "2021-08-02 00:41:47 (12.7 MB/s) - ‘known/obama.jpg’ saved [194499/194499]\n",
+            "\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "af6WxsUel9ZX",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "734d427f-7a36-47f9-dc4f-7924a5997171"
+      },
+      "source": [
+        "!mkdir unknown\n",
+        "!wget https://i.insider.com/5ddfa893fd9db26b8a4a2df7 -O unknown/1.jpg\n",
+        "!wget https://cdn-images-1.medium.com/max/1200/1*aEoYLgy4z1lT1kW7dqWzBg.jpeg -O unknown/2.jpg\n",
+        "!wget https://media2.s-nbcnews.com/j/newscms/2017_46/2224911/171113-bill-gates-se-247p_043bd413c63b2a97abf11bfad747538d.fit-760w.jpg -O unknown/3.jpg\n",
+        "!wget https://specials-images.forbesimg.com/imageserve/1184274010/960x0.jpg -O unknown/4.jpg"
+      ],
+      "execution_count": 58,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "mkdir: cannot create directory ‘unknown’: File exists\n",
+            "--2021-08-02 00:41:59--  https://i.insider.com/5ddfa893fd9db26b8a4a2df7\n",
+            "Resolving i.insider.com (i.insider.com)... 151.101.2.217, 151.101.66.217, 151.101.130.217, ...\n",
+            "Connecting to i.insider.com (i.insider.com)|151.101.2.217|:443... connected.\n",
+            "HTTP request sent, awaiting response... 200 OK\n",
+            "Length: 2324104 (2.2M) [image/png]\n",
+            "Saving to: ‘unknown/1.jpg’\n",
+            "\n",
+            "unknown/1.jpg       100%[===================>]   2.22M  --.-KB/s    in 0.06s   \n",
+            "\n",
+            "2021-08-02 00:41:59 (34.6 MB/s) - ‘unknown/1.jpg’ saved [2324104/2324104]\n",
+            "\n",
+            "Warning: wildcards not supported in HTTP.\n",
+            "--2021-08-02 00:41:59--  https://cdn-images-1.medium.com/max/1200/1*aEoYLgy4z1lT1kW7dqWzBg.jpeg\n",
+            "Resolving cdn-images-1.medium.com (cdn-images-1.medium.com)... 162.159.153.4, 162.159.152.4, 2606:4700:7::a29f:9804, ...\n",
+            "Connecting to cdn-images-1.medium.com (cdn-images-1.medium.com)|162.159.153.4|:443... connected.\n",
+            "HTTP request sent, awaiting response... 200 OK\n",
+            "Length: 119795 (117K) [image/jpeg]\n",
+            "Saving to: ‘unknown/2.jpg’\n",
+            "\n",
+            "unknown/2.jpg       100%[===================>] 116.99K  --.-KB/s    in 0.02s   \n",
+            "\n",
+            "2021-08-02 00:41:59 (7.53 MB/s) - ‘unknown/2.jpg’ saved [119795/119795]\n",
+            "\n",
+            "--2021-08-02 00:41:59--  https://media2.s-nbcnews.com/j/newscms/2017_46/2224911/171113-bill-gates-se-247p_043bd413c63b2a97abf11bfad747538d.fit-760w.jpg\n",
+            "Resolving media2.s-nbcnews.com (media2.s-nbcnews.com)... 104.65.188.131, 2600:1406:1400:688::a1d, 2600:1406:1400:6a6::a1d\n",
+            "Connecting to media2.s-nbcnews.com (media2.s-nbcnews.com)|104.65.188.131|:443... connected.\n",
+            "HTTP request sent, awaiting response... 200 OK\n",
+            "Length: 49760 (49K) [image/jpeg]\n",
+            "Saving to: ‘unknown/3.jpg’\n",
+            "\n",
+            "unknown/3.jpg       100%[===================>]  48.59K  --.-KB/s    in 0.05s   \n",
+            "\n",
+            "2021-08-02 00:42:00 (1009 KB/s) - ‘unknown/3.jpg’ saved [49760/49760]\n",
+            "\n",
+            "--2021-08-02 00:42:00--  https://specials-images.forbesimg.com/imageserve/1184274010/960x0.jpg\n",
+            "Resolving specials-images.forbesimg.com (specials-images.forbesimg.com)... 151.101.2.49, 151.101.66.49, 151.101.130.49, ...\n",
+            "Connecting to specials-images.forbesimg.com (specials-images.forbesimg.com)|151.101.2.49|:443... connected.\n",
+            "HTTP request sent, awaiting response... 200 OK\n",
+            "Length: 41857 (41K) [image/jpeg]\n",
+            "Saving to: ‘unknown/4.jpg’\n",
+            "\n",
+            "unknown/4.jpg       100%[===================>]  40.88K  --.-KB/s    in 0.003s  \n",
+            "\n",
+            "2021-08-02 00:42:00 (13.5 MB/s) - ‘unknown/4.jpg’ saved [41857/41857]\n",
+            "\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "EIjKCXI4mdhn"
+      },
+      "source": [
+        "import face_recognition\n",
+        "import cv2\n",
+        "import os\n",
+        "from google.colab.patches import cv2_imshow\n",
+        "\n",
+        "def read_img(path):\n",
+        "    img = cv2.imread(path)\n",
+        "    if img is not None :\n",
+        "        (h, w) = img.shape[:2]\n",
+        "        width = 500\n",
+        "        ratio = width / float(w)\n",
+        "        height = int(h * ratio)\n",
+        "        return cv2.resize(img, (width, height))\n",
+        "\n",
+        "\n",
+        "known_encodings = []\n",
+        "known_names = []\n",
+        "known_dir = 'known'\n",
+        "\n",
+        "for file in os.listdir(known_dir):\n",
+        "  if file != \".ipynb_checkpoints\" :\n",
+        "    img = face_recognition.load_image_file(known_dir + '/' + file)\n",
+        "    face_locations = face_recognition.face_locations(img)\n",
+        "    face_landmarks_list = face_recognition.face_landmarks(img)  \n",
+        "    img_enc = face_recognition.face_encodings(img)[0]\n",
+        "    known_encodings.append(img_enc)\n",
+        "    known_names.append(file.split('.')[0])\n",
+        "\n",
+        "unknown_dir = 'unknown'\n",
+        "for file in os.listdir(unknown_dir):\n",
+        "    print(\"Processing\", file)\n",
+        "    img = read_img(unknown_dir + '/' + file)\n",
+        "    img_enc = face_recognition.face_encodings(img)[0]\n",
+        "\n",
+        "    results = face_recognition.compare_faces(known_encodings, img_enc)\n",
+        "    # print(face_recognition.face_distance(known_encodings, img_enc))\n",
+        "\n",
+        "    for i in range(len(results)):\n",
+        "        if results[i]:\n",
+        "            name = known_names[i]\n",
+        "            (top, right, bottom, left) = face_recognition.face_locations(img)[0]\n",
+        "            cv2.rectangle(img, (left, top), (right, bottom), (0, 0, 255), 2)\n",
+        "            cv2.putText(img, name, (left+2, bottom+20), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1)\n",
+        "            cv2_imshow(img)\n",
+        "            \n",
+        "\n",
+        "    # print(results)\n",
+        "\n"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "8XdhZwDCXDNp"
+      },
+      "source": [
+        "from IPython.display import display, Javascript\n",
+        "from google.colab.output import eval_js\n",
+        "from base64 import b64decode\n",
+        "\n",
+        "def take_photo(filename='photo.jpg', quality=0.8):\n",
+        "  js = Javascript('''\n",
+        "    async function takePhoto(quality) {\n",
+        "      const div = document.createElement('div');\n",
+        "      const capture = document.createElement('button');\n",
+        "      capture.textContent = 'Capture';\n",
+        "      div.appendChild(capture);\n",
+        "\n",
+        "      const video = document.createElement('video');\n",
+        "      video.style.display = 'block';\n",
+        "      const stream = await navigator.mediaDevices.getUserMedia({video: true});\n",
+        "\n",
+        "      document.body.appendChild(div);\n",
+        "      div.appendChild(video);\n",
+        "      video.srcObject = stream;\n",
+        "      await video.play();\n",
+        "\n",
+        "      // Resize the output to fit the video element.\n",
+        "      google.colab.output.setIframeHeight(document.documentElement.scrollHeight, true);\n",
+        "\n",
+        "      // Wait for Capture to be clicked.\n",
+        "      await new Promise((resolve) => capture.onclick = resolve);\n",
+        "\n",
+        "      const canvas = document.createElement('canvas');\n",
+        "      canvas.width = video.videoWidth;\n",
+        "      canvas.height = video.videoHeight;\n",
+        "      canvas.getContext('2d').drawImage(video, 0, 0);\n",
+        "      stream.getVideoTracks()[0].stop();\n",
+        "      div.remove();\n",
+        "      return canvas.toDataURL('image/jpeg', quality);\n",
+        "    }\n",
+        "    ''')\n",
+        "  display(js)\n",
+        "  data = eval_js('takePhoto({})'.format(quality))\n",
+        "  binary = b64decode(data.split(',')[1])\n",
+        "  \n",
+        "  return filename"
+      ],
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "DsKVjBjtXDN6"
+      },
+      "source": [
+        "from IPython.display import Image\n",
+        "try:\n",
+        "  filename = take_photo()\n",
+        "  print('Saved to {}'.format(filename))\n",
+        "  \n",
+        "  # Show the image which was just taken.\n",
+        "  display(Image(filename))\n",
+        "except Exception as err:\n",
+        "  # Errors will be thrown if the user does not have a webcam or if they do not\n",
+        "  # grant the page permission to access it.\n",
+        "  print(str(err))"
+      ],
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
